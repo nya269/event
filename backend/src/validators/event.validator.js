@@ -25,62 +25,38 @@ export const createEventSchema = {
       }),
     description: Joi.string()
       .max(5000)
-      .allow('')
+      .allow('', null)
       .messages({
         'string.max': 'Description must be at most 5000 characters',
       }),
     location: Joi.string()
       .max(500)
-      .allow('')
+      .allow('', null)
       .messages({
         'string.max': 'Location must be at most 500 characters',
       }),
     startDatetime: Joi.date()
-      .iso()
-      .greater('now')
       .required()
       .messages({
-        'date.greater': 'Start date must be in the future',
         'any.required': 'Start date is required',
       }),
     endDatetime: Joi.date()
-      .iso()
-      .greater(Joi.ref('startDatetime'))
-      .messages({
-        'date.greater': 'End date must be after start date',
-      }),
-    capacity: Joi.number()
-      .integer()
-      .min(1)
-      .max(100000)
-      .default(100)
-      .messages({
-        'number.min': 'Capacity must be at least 1',
-        'number.max': 'Capacity must be at most 100000',
-      }),
-    price: Joi.number()
-      .min(0)
-      .max(999999.99)
-      .precision(2)
-      .default(0)
-      .messages({
-        'number.min': 'Price cannot be negative',
-        'number.max': 'Price must be at most 999999.99',
-      }),
+      .allow(null, ''),
+    capacity: Joi.alternatives()
+      .try(Joi.number().integer().min(1).max(100000), Joi.string())
+      .default(100),
+    price: Joi.alternatives()
+      .try(Joi.number().min(0).max(999999.99), Joi.string())
+      .default(0),
     currency: Joi.string()
-      .length(3)
-      .uppercase()
-      .default('EUR')
-      .messages({
-        'string.length': 'Currency must be a 3-letter code',
-      }),
-    tags: Joi.array()
-      .items(Joi.string().max(50))
-      .max(10)
-      .default([])
-      .messages({
-        'array.max': 'Maximum 10 tags allowed',
-      }),
+      .max(3)
+      .default('EUR'),
+    tags: Joi.alternatives()
+      .try(
+        Joi.array().items(Joi.string().max(50)).max(10),
+        Joi.string().allow('')
+      )
+      .default([]),
     status: Joi.string()
       .valid('DRAFT', 'PUBLISHED')
       .default('DRAFT'),
@@ -200,4 +176,3 @@ export default {
   publishEventSchema,
   deleteEventSchema,
 };
-

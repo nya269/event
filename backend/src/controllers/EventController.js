@@ -8,17 +8,27 @@ class EventController {
    */
   async createEvent(req, res, next) {
     try {
+      // Parse tags if it's a JSON string (from FormData)
+      let tags = req.body.tags;
+      if (typeof tags === 'string') {
+        try {
+          tags = JSON.parse(tags);
+        } catch {
+          tags = tags.split(',').map(t => t.trim()).filter(Boolean);
+        }
+      }
+
       const eventData = {
         title: req.body.title,
         description: req.body.description,
         location: req.body.location,
         startDatetime: req.body.startDatetime,
-        endDatetime: req.body.endDatetime,
-        capacity: req.body.capacity,
-        price: req.body.price,
-        currency: req.body.currency,
-        tags: req.body.tags,
-        status: req.body.status,
+        endDatetime: req.body.endDatetime || undefined,
+        capacity: parseInt(req.body.capacity, 10) || 100,
+        price: parseFloat(req.body.price) || 0,
+        currency: req.body.currency || 'EUR',
+        tags: tags || [],
+        status: req.body.status || 'DRAFT',
       };
 
       // Handle image upload if present
