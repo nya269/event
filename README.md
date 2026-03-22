@@ -1,323 +1,375 @@
 # OneLastEvent
 
-🎉 **OneLastEvent** is a modern event management platform that connects organizers and participants. Create, discover, and attend events with ease.
+Plateforme de gestion d’événements : création, publication et inscription à des événements gratuits ou payants, avec authentification par rôles (utilisateur, organisateur, administrateur).
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+Le dépôt regroupe une API **Node.js / Express**, une application web **React (Vite)** et, à part, un projet **Expo** (`MyEvenciaApp/`) pour une expérimentation mobile.
+
+![Licence](https://img.shields.io/badge/licence-MIT-blue.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green.svg)
 
-## ✨ Features
+---
 
-- **User Authentication** - Secure JWT-based auth with refresh token rotation
-- **Role-Based Access** - USER, ORGANIZER, and ADMIN roles
-- **Event Management** - Create, edit, publish, and manage events
-- **Registration System** - Register for free or paid events
-- **Payment Processing** - Mock payments with Stripe integration ready
-- **Real-time Updates** - Socket.io for live notifications
-- **Modern UI** - Beautiful, responsive React frontend with Tailwind CSS
-- **API Documentation** - OpenAPI/Swagger specification
+## Fonctionnalités
 
-## 🎓 Student Guide
+- **Authentification** — JWT avec rotation des jetons de rafraîchissement
+- **Rôles** — `USER`, `ORGANIZER`, `ADMIN`
+- **Événements** — Création, édition, publication et gestion
+- **Inscriptions** — Événements gratuits ou payants
+- **Paiements** — Simulation et intégration **Stripe** prête à l’emploi
+- **Temps réel** — **Socket.io** pour les notifications
+- **Interface** — SPA React responsive avec **Tailwind CSS**
+- **API** — Spécification **OpenAPI / Swagger** (`backend/swagger.json`)
 
-- See `GUIDE_ETUDIANT.md` for a step-by-step onboarding (run the project, understand the codebase, and make a first contribution).
+---
 
-## 🛠️ Tech Stack
+## Architecture
 
-### Backend
-- Node.js 18+ with ES Modules
-- Express.js
-- MySQL with Sequelize ORM
-- Redis for caching/session management
-- JWT authentication
-- Socket.io for real-time features
-- Winston for logging
-- Joi for validation
+### Vue globale
 
-### Frontend
-- React 18 with Vite
-- React Router v6
-- TanStack Query (React Query)
-- Tailwind CSS
-- Headless UI
-- Axios
+L’application suit une architecture **client–serveur** : le navigateur exécute une SPA React qui dialogue avec une API REST sous le préfixe `/api`. Les données sont persistées dans **MySQL** ; **Redis** sert au cache et aux besoins de session selon la configuration. **Socket.io** fournit des canaux temps réel (notifications, salles par utilisateur ou par événement).
 
-### DevOps
-- Docker & Docker Compose
-- GitHub Actions CI/CD
-- ESLint & Prettier
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Node.js 18+
-- MySQL 8.0+
-- Redis
-- npm or yarn
-
-### Option 1: Docker (Recommended)
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/onelastevent.git
-cd onelastevent
-
-# Copy environment file
-cp backend/.env.example backend/.env
-
-# Start all services
-docker-compose up -d
-
-# Run migrations and seed
-docker-compose exec backend npm run migrate
-docker-compose exec backend npm run seed
+```mermaid
+flowchart TB
+  subgraph clients [Clients]
+    WEB[Navigateur — React Vite]
+    MOB[Expo — optionnel]
+  end
+  subgraph api [Serveur Node]
+    EXP[Express — routes /api]
+    SIO[Socket.io]
+  end
+  subgraph persistance [Persistance]
+    MYSQL[(MySQL)]
+    REDIS[(Redis)]
+  end
+  WEB -->|HTTP REST /api| EXP
+  WEB -->|WebSocket| SIO
+  MOB -->|HTTP| EXP
+  EXP --> MYSQL
+  EXP --> REDIS
+  SIO --- EXP
 ```
 
-The application will be available at:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:4000/api
-- API Health: http://localhost:4000/api/health
+### Couches côté backend (`backend/src/`)
 
-### Option 2: Local Development
+| Couche | Rôle |
+|--------|------|
+| **Routes** (`routes/`) | Chemins : `/auth`, `/users`, `/events`, `/inscriptions`, `/payments` |
+| **Middlewares** (`middlewares/`) | JWT, rôles, validation, limitation de débit, erreurs |
+| **Contrôleurs** (`controllers/`) | Adaptateurs HTTP vers les services |
+| **Services** (`services/`) | Règles métier (auth, événements, inscriptions, paiements, utilisateurs) |
+| **Repositories** (`repositories/`) | Accès aux données (Sequelize) |
+| **Modèles** (`models/`) | Utilisateurs, événements, inscriptions, paiements |
+| **Validators** (`validators/`) | Schémas **Joi** |
+| **`server.js`** | Express, Helmet, CORS, `/api`, HTTP + Socket.io |
 
-#### 1. Setup MySQL and Redis
+Le point d’entrée API est **`http://<hôte>:<port>/api`** (ex. `POST /api/auth/login`).
 
-Make sure MySQL and Redis are running locally.
+### Frontend (`frontend/src/`)
 
-#### 2. Backend Setup
+| Zone | Rôle |
+|------|------|
+| `App.jsx` / `main.jsx` | Routage et montage |
+| `pages/` | Accueil, événements, tableaux de bord, profil, auth |
+| `components/` | UI réutilisable (layout, cartes, pagination, modales) |
+| `context/AuthContext.jsx` | Session et jetons |
+| `services/` | **Axios** ; en dev, **Vite** proxifie `/api`, `/uploads`, `/socket.io` vers le port **4000** |
+
+### Arborescence du dépôt
+
+```
+event-main/
+├── backend/
+│   ├── src/
+│   │   ├── config/          # Base, Redis, logs
+│   │   ├── controllers/
+│   │   ├── middlewares/     # Auth, validation, erreurs
+│   │   ├── models/
+│   │   ├── repositories/
+│   │   ├── routes/
+│   │   ├── services/
+│   │   ├── utils/
+│   │   ├── validators/
+│   │   └── server.js
+│   ├── Dockerfile
+│   ├── swagger.json
+│   └── postman_collection.json
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── Dockerfile
+│   └── package.json
+├── MyEvenciaApp/            # Expo (optionnel)
+├── docker-compose.yml
+├── docker-compose.prod.yml
+├── docs/
+└── README.md
+```
+
+Pour plus de détails (flux, mobile), voir **[`docs/README.md`](./docs/README.md)**.
+
+---
+
+## Installation
+
+### Prérequis
+
+| Outil | Remarque |
+|-------|----------|
+| **Node.js** | ≥ 18 |
+| **npm** | (yarn / pnpm possibles) |
+| **MySQL** | 8.x |
+| **Redis** | local ou Docker |
+| **Docker** | optionnel (`docker compose`) |
+
+### Cloner le dépôt
+
+```bash
+git clone <url-du-depot>
+cd event-main
+```
+
+### Backend
 
 ```bash
 cd backend
-
-# Install dependencies
 npm install
-
-# Copy and configure environment
 cp .env.example .env
-# Edit .env with your database credentials
-
-# Run migrations
-npm run migrate
-
-# Seed sample data
-npm run seed
-
-# Start development server
-npm run dev
 ```
 
-#### 3. Frontend Setup
+Configurer **`backend/.env`** (voir [Variables d’environnement](#variables-denvironnement)), puis :
 
 ```bash
-cd frontend
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
+npm run migrate
+npm run seed
 ```
 
-## 📝 Environment Variables
+### Frontend web
 
-Create a `.env` file in the backend directory:
+```bash
+cd ../frontend
+npm install
+```
+
+En local, l’API est en général relative (`/api`) via le proxy Vite. Pour un frontend servi à part, définir **`VITE_API_URL`**.
+
+### Option Docker
+
+```bash
+docker compose up -d --build
+docker compose exec backend npm run migrate
+docker compose exec backend npm run seed
+```
+
+MySQL est souvent exposé sur le port hôte **3307** (voir `docker-compose.yml`). Fournir notamment **`JWT_ACCESS_SECRET`** et **`JWT_REFRESH_SECRET`**.
+
+---
+
+## Variables d’environnement
+
+Créer **`backend/.env`** (à partir de `.env.example`). Exemple minimal pour le développement local :
 
 ```env
-# App
 NODE_ENV=development
 PORT=4000
 FRONTEND_URL=http://localhost:3000
 
-# Database
 DB_HOST=localhost
 DB_PORT=3306
 DB_USER=onevent_user
 DB_PASS=changeme
 DB_NAME=onelastevent_db
 
-# JWT (Change these in production!)
-JWT_ACCESS_SECRET=your_access_secret_here
-JWT_REFRESH_SECRET=your_refresh_secret_here
-JWT_ACCESS_EXP=15m
-JWT_REFRESH_EXP=30d
-
-# Redis
 REDIS_HOST=localhost
 REDIS_PORT=6379
 
-# Stripe (Optional)
+JWT_ACCESS_SECRET=votre_secret_access
+JWT_REFRESH_SECRET=votre_secret_refresh
+JWT_ACCESS_EXP=15m
+JWT_REFRESH_EXP=30d
+
+# Optionnel — paiements
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
-## 🧪 Test Accounts
-
-After running the seed script:
-
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@onelastevent.com | Admin123! |
-| Organizer | organizer1@example.com | Organizer1! |
-| User | user1@example.com | User1234! |
-
-## 📜 Available Scripts
-
-### Backend
-
-```bash
-npm run dev        # Start development server with hot reload
-npm run start      # Start production server
-npm run migrate    # Run database migrations
-npm run seed       # Seed database with sample data
-npm run test       # Run tests
-npm run lint       # Run ESLint
-npm run lint:fix   # Fix linting issues
-```
-
-### Frontend
-
-```bash
-npm run dev        # Start development server
-npm run build      # Build for production
-npm run preview    # Preview production build
-npm run test       # Run tests
-npm run lint       # Run ESLint
-```
-
-## 📚 API Documentation
-
-### OpenAPI Specification
-
-The API is documented using OpenAPI 3.0. You can find the specification at:
-- `backend/swagger.json`
-
-### Postman Collection
-
-Import `backend/postman_collection.json` into Postman for ready-to-use API requests.
-
-### Main Endpoints
-
-#### Authentication
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Login
-- `POST /api/auth/refresh` - Refresh token
-- `POST /api/auth/logout` - Logout
-
-#### Users
-- `GET /api/users/me` - Get current user
-- `PATCH /api/users/me` - Update profile
-- `GET /api/users/me/inscriptions` - Get my registrations
-
-#### Events
-- `GET /api/events` - List events (with filters)
-- `GET /api/events/:id` - Get event details
-- `POST /api/events` - Create event (Organizer)
-- `PATCH /api/events/:id` - Update event
-- `DELETE /api/events/:id` - Delete event
-- `POST /api/events/:id/publish` - Publish event
-- `POST /api/events/:id/inscriptions` - Register for event
-
-#### Payments
-- `POST /api/events/:id/payments` - Initialize payment
-- `POST /api/payments/:id/mock` - Process mock payment
-- `POST /api/payments/webhook` - Stripe webhook
-
-## 🏗️ Project Structure
-
-```
-onelastevent/
-├── backend/
-│   ├── src/
-│   │   ├── config/        # Database, Redis, Logger config
-│   │   ├── controllers/   # Request handlers
-│   │   ├── middlewares/   # Auth, validation, error handling
-│   │   ├── models/        # Sequelize models
-│   │   ├── repositories/  # Data access layer
-│   │   ├── routes/        # API routes
-│   │   ├── services/      # Business logic
-│   │   ├── utils/         # Helper functions
-│   │   ├── validators/    # Joi schemas
-│   │   └── server.js      # App entry point
-│   ├── Dockerfile
-│   └── package.json
-├── frontend/
-│   ├── src/
-│   │   ├── components/    # Reusable UI components
-│   │   ├── context/       # React context (Auth)
-│   │   ├── pages/         # Page components
-│   │   ├── services/      # API services
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── Dockerfile
-│   └── package.json
-├── docker-compose.yml
-└── README.md
-```
-
-## 🔒 Security Features
-
-- JWT access tokens (15min expiry) with refresh token rotation
-- Password hashing with bcrypt (12 rounds)
-- Rate limiting on sensitive endpoints
-- Helmet security headers
-- CORS configuration
-- Input validation with Joi
-- SQL injection protection (Sequelize prepared statements)
-- Token blacklisting on logout
-
-## 🧪 Testing
-
-### Backend Tests
-
-```bash
-cd backend
-npm test
-```
-
-### Frontend Tests
-
-```bash
-cd frontend
-npm test
-```
-
-## 🚢 Deployment
-
-### Production Build
-
-```bash
-# Build frontend
-cd frontend && npm run build
-
-# Build Docker images
-docker-compose -f docker-compose.prod.yml build
-
-# Start services
-docker-compose -f docker-compose.prod.yml up -d
-```
-
-### Environment Checklist
-
-- [ ] Set strong JWT secrets
-- [ ] Configure proper database credentials
-- [ ] Set `NODE_ENV=production`
-- [ ] Configure CORS for your domain
-- [ ] Set up SSL/HTTPS
-- [ ] Configure Stripe keys for payments
-- [ ] Set up proper logging and monitoring
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+En production : secrets JWT forts, CORS adapté au domaine, HTTPS, credentials base et Redis sécurisés.
 
 ---
 
-Made with ❤️ by the OneLastEvent Team
+## Lancement
 
+### Développement local
+
+1. Démarrer **MySQL** et **Redis**.
+2. **Terminal 1 — backend** (`backend/`) : `npm run dev`  
+   - API : `http://localhost:4000/api` — Santé : `GET /api/health`
+3. **Terminal 2 — frontend** (`frontend/`) : `npm run dev`  
+   - UI : `http://localhost:3000`
+
+Mode API proche production : **`npm start`** dans `backend/`.
+
+### Build frontend
+
+```bash
+cd frontend
+npm run build
+npm run preview
+```
+
+### Vérification
+
+- `http://localhost:3000` + connexion avec les [identifiants de test](#identifiants-de-test)
+- `http://localhost:4000/api/health` → statut `ok`
+
+---
+
+## Identifiants de test
+
+Après **`npm run seed`** dans `backend/` :
+
+| Rôle | E-mail | Mot de passe |
+|------|--------|----------------|
+| **Administrateur** | `admin@test.com` | `MotDePasse123!` |
+| **Utilisateur** | `user@test.com` | `MotDePasse123!` |
+
+Organisateur (seed) : `organizer1@example.com` / `Organizer1!`.
+
+---
+
+## Scripts disponibles
+
+### Backend (`backend/`)
+
+| Commande | Description |
+|----------|-------------|
+| `npm run dev` | Serveur de développement (rechargement) |
+| `npm start` | Serveur production |
+| `npm run migrate` | Migrations base de données |
+| `npm run seed` | Données de démonstration |
+| `npm test` | Tests (Jest) |
+| `npm run lint` | ESLint |
+
+### Frontend (`frontend/`)
+
+| Commande | Description |
+|----------|-------------|
+| `npm run dev` | Serveur Vite |
+| `npm run build` | Build production |
+| `npm run preview` | Prévisualiser le build |
+| `npm test` | Tests (Vitest) |
+| `npm run lint` | ESLint |
+
+---
+
+## Documentation API
+
+- **OpenAPI 3.0** : `backend/swagger.json`
+- **Postman** : importer `backend/postman_collection.json`
+
+### Principaux endpoints
+
+**Authentification**
+
+- `POST /api/auth/register` — Inscription  
+- `POST /api/auth/login` — Connexion  
+- `POST /api/auth/refresh` — Rafraîchir les jetons  
+- `POST /api/auth/logout` — Déconnexion  
+
+**Utilisateurs**
+
+- `GET /api/users/me` — Profil courant  
+- `PATCH /api/users/me` — Mise à jour  
+- `GET /api/users/me/inscriptions` — Mes inscriptions  
+
+**Événements**
+
+- `GET /api/events` — Liste (filtres)  
+- `GET /api/events/:id` — Détail  
+- `POST /api/events` — Création (organisateur)  
+- `PATCH /api/events/:id` — Mise à jour  
+- `DELETE /api/events/:id` — Suppression  
+- `POST /api/events/:id/publish` — Publication  
+- `POST /api/events/:id/inscriptions` — S’inscrire  
+
+**Paiements**
+
+- `POST /api/events/:id/payments` — Initialiser un paiement  
+- `POST /api/payments/:id/mock` — Paiement simulé  
+- `POST /api/payments/webhook` — Webhook Stripe  
+
+---
+
+## Sécurité
+
+- Jetons d’accès JWT (durée limitée) et rafraîchissement  
+- Hachage des mots de passe (**bcrypt**)  
+- **Rate limiting** sur les routes sensibles  
+- En-têtes **Helmet**, **CORS** configuré avec `FRONTEND_URL`  
+- Validation **Joi**, requêtes paramétrées via Sequelize  
+- Invalidation des jetons à la déconnexion (selon implémentation)
+
+---
+
+## Tests
+
+```bash
+cd backend && npm test
+cd frontend && npm test
+```
+
+CI : `.github/workflows/ci.yml`.
+
+---
+
+## Déploiement
+
+```bash
+cd frontend && npm run build
+docker compose -f docker-compose.prod.yml build
+docker compose -f docker-compose.prod.yml up -d
+```
+
+**Checklist** : secrets JWT forts, `NODE_ENV=production`, CORS/HTTPS, clés Stripe, sauvegardes base, monitoring des logs.
+
+Guides complémentaires : `DEPLOYMENT.md`, `GUIDE_PRODUCTION.md`.
+
+---
+
+## Technologies utilisées
+
+| Couche | Stack |
+|--------|--------|
+| **Backend** | Node.js (ES modules), Express, Sequelize, MySQL, Redis (ioredis), JWT, bcrypt, Joi, Socket.io, Stripe, Winston |
+| **Frontend** | React 18, Vite, React Router v6, TanStack Query, Axios, Tailwind CSS, Headless UI, react-hot-toast, Socket.io client |
+| **Mobile (optionnel)** | Expo (`MyEvenciaApp/`) |
+| **DevOps** | Docker & Docker Compose, GitHub Actions, ESLint |
+
+---
+
+## Documentation et ressources
+
+- Documentation détaillée : **[`docs/README.md`](./docs/README.md)**  
+- Guide pas à pas : **`GUIDE_ETUDIANT.md`**  
+- OpenAPI : `backend/swagger.json`  
+- Postman : `backend/postman_collection.json`
+
+---
+
+## Contribuer
+
+1. Fork du dépôt  
+2. Branche : `git checkout -b feature/ma-fonctionnalite`  
+3. Commits puis `git push`  
+4. Ouvrir une **Pull Request**
+
+---
+
+## Licence
+
+MIT.
