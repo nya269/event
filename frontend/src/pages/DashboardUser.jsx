@@ -10,6 +10,7 @@ import {
 import usersService from '../services/users';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useAuth } from '../context/AuthContext';
+import { getImageUrl } from '../utils/imageUrl';
 
 function DashboardUser() {
   const { user } = useAuth();
@@ -160,7 +161,7 @@ function InscriptionCard({ inscription, onCancel, cancelling, isPast, isCancelle
       >
         {event.imageUrl ? (
           <img
-            src={event.imageUrl}
+            src={getImageUrl(event.imageUrl)}
             alt={event.title}
             className="w-full h-full object-cover"
           />

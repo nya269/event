@@ -1,0 +1,33 @@
+$kind: http-request
+method: PATCH
+url: '{{baseUrl}}/events/{{eventId}}'
+order: 5000
+headers:
+  - key: Authorization
+    value: 'Bearer {{organizerToken}}'
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "Test Event Postman - Updated",
+      "price": 30
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Update event - Status 200", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Event updated successfully", function () {
+          const jsonData = pm.response.json();
+          const event = jsonData.data || jsonData.event || jsonData;
+          pm.expect(event.title).to.include("Updated");
+      });
+
+      pm.test("Response time < 2000ms", function () {
+          pm.expect(pm.response.responseTime).to.be.below(2000);
+      });
+    language: text/javascript

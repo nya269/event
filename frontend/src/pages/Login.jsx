@@ -135,9 +135,9 @@ function Login() {
         <div className="mt-6 p-4 bg-white/5 rounded-xl border border-white/10">
           <p className="text-sm text-neutral-400 mb-2">Demo accounts:</p>
           <div className="space-y-1 text-sm font-mono">
-            <p className="text-neutral-300">admin@onelastevent.com / Admin123!</p>
+            <p className="text-neutral-300">admin@test.com / MotDePasse123!</p>
             <p className="text-neutral-300">organizer1@example.com / Organizer1!</p>
-            <p className="text-neutral-300">user1@example.com / User1234!</p>
+            <p className="text-neutral-300">user@test.com / MotDePasse123!</p>
           </div>
         </div>
       </div>

@@ -1,0 +1,22 @@
+$kind: http-request
+method: POST
+url: '{{baseUrl}}/events/{{eventId}}/publish'
+order: 6000
+headers:
+  - key: Authorization
+    value: 'Bearer {{organizerToken}}'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Publish event - Status 200", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Event is published", function () {
+          const jsonData = pm.response.json();
+          const event = jsonData.data || jsonData.event || jsonData;
+          if (event.status) {
+              pm.expect(event.status.toLowerCase()).to.include("publish");
+          }
+      });
+    language: text/javascript

@@ -12,6 +12,7 @@ import {
 import eventsService from '../services/events';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useAuth } from '../context/AuthContext';
+import { getImageUrl } from '../utils/imageUrl';
 
 function DashboardOrganizer() {
   const { user } = useAuth();
@@ -171,7 +172,7 @@ function EventRow({ event }) {
       >
         {event.imageUrl ? (
           <img
-            src={event.imageUrl}
+            src={getImageUrl(event.imageUrl)}
             alt={event.title}
             className="w-full h-full object-cover"
           />

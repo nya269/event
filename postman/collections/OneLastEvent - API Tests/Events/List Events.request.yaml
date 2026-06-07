@@ -1,0 +1,21 @@
+$kind: http-request
+method: GET
+url: '{{baseUrl}}/events?page=1&limit=10'
+order: 1000
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Get events - Status 200", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Response contains events", function () {
+          const jsonData = pm.response.json();
+          const events = Array.isArray(jsonData) ? jsonData : jsonData.data || jsonData.events;
+          pm.expect(events).to.be.an("array");
+      });
+
+      pm.test("Response time < 2000ms", function () {
+          pm.expect(pm.response.responseTime).to.be.below(2000);
+      });
+    language: text/javascript

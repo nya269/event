@@ -35,9 +35,9 @@ async function seed() {
       await User.destroy({ where: {} });
     }
 
-    // Create password hashes
-    const adminPassword = await hashPassword('Admin123!');
-    const userPassword = await hashPassword('User1234!');
+    // Create password hashes (identifiants jury : voir README)
+    const adminPassword = await hashPassword('MotDePasse123!');
+    const userPassword = await hashPassword('MotDePasse123!');
     const organizerPassword = await hashPassword('Organizer1!');
 
     // Create users
@@ -45,7 +45,7 @@ async function seed() {
     
     const admin = await User.create({
       id: uuidv4(),
-      email: 'admin@onelastevent.com',
+      email: 'admin@test.com',
       password_hash: adminPassword,
       full_name: 'Admin User',
       role: 'ADMIN',
@@ -77,7 +77,19 @@ async function seed() {
     console.log(`   ✅ Organizer: ${organizer2.email}`);
 
     const users = [];
-    for (let i = 1; i <= 5; i++) {
+    const primaryUser = await User.create({
+      id: uuidv4(),
+      email: 'user@test.com',
+      password_hash: userPassword,
+      full_name: 'Utilisateur test',
+      role: 'USER',
+      is_verified: true,
+      bio: 'Compte utilisateur pour démonstration (jury)',
+    });
+    users.push(primaryUser);
+    console.log(`   ✅ User: ${primaryUser.email}`);
+
+    for (let i = 2; i <= 5; i++) {
       const user = await User.create({
         id: uuidv4(),
         email: `user${i}@example.com`,
@@ -321,9 +333,9 @@ async function seed() {
     console.log(`   - Inscriptions: ${inscriptions.length}`);
     console.log(`   - Payments: 2`);
     console.log('\n🔑 Test accounts:');
-    console.log(`   Admin: admin@onelastevent.com / Admin123!`);
+    console.log(`   Admin: admin@test.com / MotDePasse123!`);
     console.log(`   Organizer: organizer1@example.com / Organizer1!`);
-    console.log(`   User: user1@example.com / User1234!`);
+    console.log(`   User: user@test.com / MotDePasse123!`);
 
     process.exit(0);
   } catch (error) {

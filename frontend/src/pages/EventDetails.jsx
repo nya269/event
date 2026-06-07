@@ -19,6 +19,7 @@ import paymentsService from '../services/payments';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Modal from '../components/Modal';
+import { getImageUrl } from '../utils/imageUrl';
 
 function EventDetails() {
   const { id } = useParams();
@@ -145,7 +146,7 @@ function EventDetails() {
             <div className="aspect-[16/9] rounded-2xl overflow-hidden">
               {event.imageUrl ? (
                 <img
-                  src={event.imageUrl}
+                  src={getImageUrl(event.imageUrl)}
                   alt={event.title}
                   className="w-full h-full object-cover"
                 />

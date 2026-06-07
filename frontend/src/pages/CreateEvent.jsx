@@ -25,9 +25,9 @@ function CreateEvent() {
     currency: 'EUR',
     tags: '',
     status: 'DRAFT',
+    imageUrl: '',
   });
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [imgBroken, setImgBroken] = useState(false);
   const [errors, setErrors] = useState({});
 
   const createMutation = useMutation({
@@ -43,22 +43,11 @@ function CreateEvent() {
 
   const handleChange = (e) => {
     const { name, value, type } = e.target;
+    if (name === 'imageUrl') setImgBroken(false);
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'number' ? parseFloat(value) || 0 : value,
     }));
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
   };
 
   const validate = () => {
@@ -81,7 +70,6 @@ function CreateEvent() {
         ? formData.tags.split(',').map((t) => t.trim()).filter(Boolean)
         : [],
       status: publish ? 'PUBLISHED' : 'DRAFT',
-      image: imageFile,
     };
 
     createMutation.mutate(eventData);
@@ -100,43 +88,41 @@ function CreateEvent() {
         </div>
 
         <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-8">
-          {/* Image upload */}
+          {/* Image URL */}
           <div className="glass p-6">
-            <label className="label flex items-center gap-2">
+            <label htmlFor="imageUrl" className="label flex items-center gap-2">
               <PhotoIcon className="w-4 h-4" />
-              Event Image
+              Event Image URL
             </label>
-            <div
-              className={`mt-2 border-2 border-dashed rounded-xl p-8 text-center cursor-pointer hover:border-primary-500 transition-colors ${
-                imagePreview ? 'border-primary-500' : 'border-white/10'
-              }`}
-              onClick={() => document.getElementById('image-upload').click()}
-            >
-              {imagePreview ? (
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="max-h-48 mx-auto rounded-lg"
-                />
-              ) : (
-                <>
-                  <PhotoIcon className="w-12 h-12 text-neutral-600 mx-auto mb-4" />
-                  <p className="text-neutral-400">
-                    Click to upload event image
-                  </p>
-                  <p className="text-neutral-500 text-sm mt-1">
-                    PNG, JPG, GIF up to 5MB
-                  </p>
-                </>
-              )}
-            </div>
             <input
-              id="image-upload"
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="hidden"
+              id="imageUrl"
+              name="imageUrl"
+              type="url"
+              value={formData.imageUrl}
+              onChange={handleChange}
+              className="input mt-2"
+              placeholder="https://example.com/image.jpg"
             />
+            {formData.imageUrl && !imgBroken && (
+              <div className="mt-3 rounded-xl overflow-hidden border border-white/10">
+                <img
+                  src={formData.imageUrl}
+                  alt="Preview"
+                  className="max-h-48 w-full object-cover"
+                  onError={() => setImgBroken(true)}
+                />
+              </div>
+            )}
+            {formData.imageUrl && imgBroken && (
+              <p className="mt-2 text-sm text-red-400">
+                Image inaccessible — vérifiez l'URL
+              </p>
+            )}
+            {!formData.imageUrl && (
+              <p className="mt-2 text-neutral-500 text-sm">
+                Collez un lien vers une image (Unsplash, Imgur, etc.)
+              </p>
+            )}
           </div>
 
           {/* Basic info */}
@@ -366,4 +352,3 @@ function CreateEvent() {
 }
 
 export default CreateEvent;
-

@@ -1,0 +1,38 @@
+$kind: http-request
+method: POST
+url: '{{baseUrl}}/auth/login'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "{{adminEmail}}",
+      "password": "{{adminPassword}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Login Admin - Status 200", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Response contains access token", function () {
+          const jsonData = pm.response.json();
+          pm.expect(jsonData).to.have.property("accessToken");
+          pm.environment.set("accessToken", jsonData.accessToken);
+      });
+
+      pm.test("Response contains refresh token", function () {
+          const jsonData = pm.response.json();
+          if (jsonData.refreshToken) {
+              pm.environment.set("refreshToken", jsonData.refreshToken);
+          }
+      });
+
+      pm.test("Response time < 2000ms", function () {
+          pm.expect(pm.response.responseTime).to.be.below(2000);
+      });
+    language: text/javascript

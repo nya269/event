@@ -1,0 +1,22 @@
+$kind: http-request
+method: POST
+url: '{{baseUrl}}/events/{{eventId}}/unpublish'
+order: 7000
+headers:
+  - key: Authorization
+    value: 'Bearer {{organizerToken}}'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Unpublish event - Status 200", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Event is unpublished", function () {
+          const jsonData = pm.response.json();
+          const event = jsonData.data || jsonData.event || jsonData;
+          if (event.status) {
+              pm.expect(event.status.toLowerCase()).to.not.equal("published");
+          }
+      });
+    language: text/javascript

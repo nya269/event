@@ -1,0 +1,47 @@
+name: OneLastEvent Tests
+values:
+  - key: baseUrl
+    value: 'http://localhost:3000'
+    enabled: true
+  - key: adminEmail
+    value: admin@onelastevent.com
+    enabled: true
+  - key: adminPassword
+    value: Admin123!
+    enabled: true
+  - key: organizerEmail
+    value: organizer1@example.com
+    enabled: true
+  - key: organizerPassword
+    value: Organizer1!
+    enabled: true
+  - key: userEmail
+    value: user1@example.com
+    enabled: true
+  - key: userPassword
+    value: User1234!
+    enabled: true
+  - key: accessToken
+    value: ''
+    enabled: true
+  - key: refreshToken
+    value: ''
+    enabled: true
+  - key: organizerToken
+    value: ''
+    enabled: true
+  - key: userToken
+    value: ''
+    enabled: true
+  - key: eventId
+    value: ''
+    enabled: true
+  - key: inscriptionId
+    value: ''
+    enabled: true
+  - key: paymentId
+    value: ''
+    enabled: true
+  - key: userId
+    value: ''
+    enabled: true

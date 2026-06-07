@@ -1,0 +1,22 @@
+$kind: http-request
+method: GET
+url: '{{baseUrl}}/events/{{eventId}}'
+order: 4000
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Get event by ID - Status 200", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Event data returned", function () {
+          const jsonData = pm.response.json();
+          const event = jsonData.data || jsonData.event || jsonData;
+          pm.expect(event).to.have.property("id");
+          pm.expect(event).to.have.property("title");
+      });
+
+      pm.test("Response time < 1000ms", function () {
+          pm.expect(pm.response.responseTime).to.be.below(1000);
+      });
+    language: text/javascript

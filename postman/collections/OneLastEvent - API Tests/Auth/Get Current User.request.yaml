@@ -1,0 +1,27 @@
+$kind: http-request
+method: GET
+url: '{{baseUrl}}/auth/me'
+order: 4000
+headers:
+  - key: Authorization
+    value: 'Bearer {{accessToken}}'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Auth check - Status 200", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Response contains user data", function () {
+          const jsonData = pm.response.json();
+          const user = jsonData.data || jsonData.user || jsonData;
+          pm.expect(user).to.have.property("email");
+          if (user.id) {
+              pm.environment.set("userId", user.id);
+          }
+      });
+
+      pm.test("Response time < 1000ms", function () {
+          pm.expect(pm.response.responseTime).to.be.below(1000);
+      });
+    language: text/javascript

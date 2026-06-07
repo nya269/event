@@ -29,12 +29,8 @@ class EventController {
         currency: req.body.currency || 'EUR',
         tags: tags || [],
         status: req.body.status || 'DRAFT',
+        imageUrl: req.body.imageUrl || undefined,
       };
-
-      // Handle image upload if present
-      if (req.file) {
-        eventData.imageUrl = getFileUrl(req.file);
-      }
 
       const event = await EventService.createEvent(eventData, req.userId);
 

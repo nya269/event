@@ -63,8 +63,8 @@ describe('Auth API', () => {
       const res = await request(API_URL)
         .post('/api/auth/login')
         .send({
-          email: 'admin@onelastevent.com',
-          password: 'Admin123!',
+          email: 'admin@test.com',
+          password: 'MotDePasse123!',
         })
         .expect('Content-Type', /json/);
 
@@ -80,7 +80,7 @@ describe('Auth API', () => {
       const res = await request(API_URL)
         .post('/api/auth/login')
         .send({
-          email: 'admin@onelastevent.com',
+          email: 'admin@test.com',
           password: 'wrongpassword',
         })
         .expect('Content-Type', /json/);

@@ -52,7 +52,6 @@ router.post(
   authenticate,
   requireOrganizer,
   eventCreationLimiter,
-  uploadSingle('image'),
   validate(createEventSchema),
   EventController.createEvent
 );

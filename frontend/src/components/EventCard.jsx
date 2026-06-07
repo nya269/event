@@ -6,6 +6,7 @@ import {
   UserGroupIcon,
   TicketIcon,
 } from '@heroicons/react/24/outline';
+import { getImageUrl } from '../utils/imageUrl';
 
 function EventCard({ event }) {
   const isFree = parseFloat(event.price) === 0;
@@ -19,7 +20,7 @@ function EventCard({ event }) {
         <div className="relative aspect-[16/10] overflow-hidden">
           {event.imageUrl ? (
             <img
-              src={event.imageUrl}
+              src={getImageUrl(event.imageUrl)}
               alt={event.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />

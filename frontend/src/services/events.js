@@ -15,20 +15,7 @@ export const eventsService = {
 
   // Create event
   createEvent: async (eventData) => {
-    const formData = new FormData();
-    Object.entries(eventData).forEach(([key, value]) => {
-      if (key === 'tags' && Array.isArray(value)) {
-        formData.append(key, JSON.stringify(value));
-      } else if (key === 'image' && value instanceof File) {
-        formData.append(key, value);
-      } else if (value !== undefined && value !== null) {
-        formData.append(key, value);
-      }
-    });
-
-    const response = await api.post('/events', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const response = await api.post('/events', eventData);
     return response.data;
   },
 

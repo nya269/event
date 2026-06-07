@@ -9,6 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../context/AuthContext';
 import usersService from '../services/users';
+import { getImageUrl } from '../utils/imageUrl';
 
 function Profile() {
   const { user, updateUser } = useAuth();
@@ -125,7 +126,7 @@ function Profile() {
               <div className="relative">
                 {user?.avatarUrl ? (
                   <img
-                    src={user.avatarUrl}
+                    src={getImageUrl(user.avatarUrl)}
                     alt={user.fullName}
                     className="w-24 h-24 rounded-full object-cover"
                   />

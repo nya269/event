@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
+import { PhotoIcon } from '@heroicons/react/24/outline';
 import eventsService from '../services/events';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -13,6 +14,7 @@ function EditEvent() {
 
   const [formData, setFormData] = useState(null);
   const [errors, setErrors] = useState({});
+  const [imgBroken, setImgBroken] = useState(false);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['event', id],
@@ -37,7 +39,9 @@ function EditEvent() {
         price: event.price || 0,
         currency: event.currency || 'EUR',
         tags: event.tags?.join(', ') || '',
+        imageUrl: event.imageUrl || '',
       });
+      setImgBroken(false);
     }
   }, [data]);
 
@@ -88,6 +92,7 @@ function EditEvent() {
 
   const handleChange = (e) => {
     const { name, value, type } = e.target;
+    if (name === 'imageUrl') setImgBroken(false);
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'number' ? parseFloat(value) || 0 : value,
@@ -120,6 +125,7 @@ function EditEvent() {
       tags: formData.tags
         ? formData.tags.split(',').map((t) => t.trim()).filter(Boolean)
         : [],
+      imageUrl: formData.imageUrl || undefined,
     };
 
     updateMutation.mutate(updates);
@@ -195,6 +201,43 @@ function EditEvent() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Image URL */}
+          <div className="glass p-6">
+            <label htmlFor="imageUrl" className="label flex items-center gap-2">
+              <PhotoIcon className="w-4 h-4" />
+              Event Image URL
+            </label>
+            <input
+              id="imageUrl"
+              name="imageUrl"
+              type="url"
+              value={formData.imageUrl}
+              onChange={handleChange}
+              className="input mt-2"
+              placeholder="https://example.com/image.jpg"
+            />
+            {formData.imageUrl && !imgBroken && (
+              <div className="mt-3 rounded-xl overflow-hidden border border-white/10">
+                <img
+                  src={formData.imageUrl}
+                  alt="Preview"
+                  className="max-h-48 w-full object-cover"
+                  onError={() => setImgBroken(true)}
+                />
+              </div>
+            )}
+            {formData.imageUrl && imgBroken && (
+              <p className="mt-2 text-sm text-red-400">
+                Image inaccessible — vérifiez l'URL
+              </p>
+            )}
+            {!formData.imageUrl && (
+              <p className="mt-2 text-neutral-500 text-sm">
+                Collez un lien vers une image (Unsplash, Imgur, etc.)
+              </p>
+            )}
+          </div>
+
           {/* Basic info */}
           <div className="glass p-6 space-y-6">
             <h2 className="font-display font-semibold text-lg text-white">

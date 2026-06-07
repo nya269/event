@@ -1,0 +1,46 @@
+$kind: http-request
+method: POST
+url: '{{baseUrl}}/events'
+order: 3000
+headers:
+  - key: Authorization
+    value: 'Bearer {{organizerToken}}'
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "Test Event Postman",
+      "description": "Event created by Postman API tests",
+      "location": "Paris, France",
+      "startDatetime": "2026-06-15T18:00:00.000Z",
+      "endDatetime": "2026-06-15T22:00:00.000Z",
+      "capacity": 100,
+      "price": 25,
+      "tags": ["test", "postman"]
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Create event - Status 201", function () {
+          pm.response.to.have.status(201);
+      });
+
+      pm.test("Event created with correct data", function () {
+          const jsonData = pm.response.json();
+          const event = jsonData.data || jsonData.event || jsonData;
+          pm.expect(event).to.have.property("id");
+          pm.environment.set("eventId", event.id);
+      });
+
+      pm.test("Event title matches", function () {
+          const jsonData = pm.response.json();
+          const event = jsonData.data || jsonData.event || jsonData;
+          pm.expect(event.title).to.include("Test Event Postman");
+      });
+
+      pm.test("Response time < 2000ms", function () {
+          pm.expect(pm.response.responseTime).to.be.below(2000);
+      });
+    language: text/javascript

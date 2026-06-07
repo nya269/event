@@ -1,0 +1,31 @@
+$kind: http-request
+method: POST
+url: '{{baseUrl}}/auth/login'
+order: 2000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "{{organizerEmail}}",
+      "password": "{{organizerPassword}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Login Organizer - Status 200", function () {
+          pm.response.to.have.status(200);
+      });
+
+      pm.test("Response contains access token", function () {
+          const jsonData = pm.response.json();
+          pm.expect(jsonData).to.have.property("accessToken");
+          pm.environment.set("organizerToken", jsonData.accessToken);
+      });
+
+      pm.test("Response time < 2000ms", function () {
+          pm.expect(pm.response.responseTime).to.be.below(2000);
+      });
+    language: text/javascript

@@ -157,8 +157,8 @@ describe('Events API', () => {
       const loginRes = await request(API_URL)
         .post('/api/auth/login')
         .send({
-          email: 'user1@example.com',
-          password: 'User1234!',
+          email: 'user@test.com',
+          password: 'MotDePasse123!',
         });
 
       if (loginRes.status !== 200) {

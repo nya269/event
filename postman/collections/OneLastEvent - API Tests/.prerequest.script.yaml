@@ -1,0 +1,4 @@
+type: text/javascript
+exec: |-
+  // Collection-level pre-request: ensure baseUrl is set
+  const baseUrl = pm.environment.get("baseUrl") || "http://localhost:4000/api";

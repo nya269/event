@@ -60,6 +60,10 @@ export const createEventSchema = {
     status: Joi.string()
       .valid('DRAFT', 'PUBLISHED')
       .default('DRAFT'),
+    imageUrl: Joi.string()
+      .uri()
+      .max(2000)
+      .allow('', null),
   }),
 };
 
@@ -98,6 +102,10 @@ export const updateEventSchema = {
     tags: Joi.array()
       .items(Joi.string().max(50))
       .max(10),
+    imageUrl: Joi.string()
+      .uri()
+      .max(2000)
+      .allow('', null),
   }).min(1).messages({
     'object.min': 'At least one field is required for update',
   }),
